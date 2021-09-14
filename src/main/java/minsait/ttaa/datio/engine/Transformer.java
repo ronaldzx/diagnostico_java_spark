@@ -9,6 +9,8 @@ import org.apache.spark.sql.expressions.Window;
 import org.apache.spark.sql.expressions.WindowSpec;
 import org.jetbrains.annotations.NotNull;
 
+import javax.xml.crypto.Data;
+
 import static minsait.ttaa.datio.common.Common.*;
 import static minsait.ttaa.datio.common.naming.PlayerInput.*;
 import static minsait.ttaa.datio.common.naming.PlayerOutput.*;
@@ -24,8 +26,9 @@ public class Transformer extends Writer {
         df.printSchema();
 
         df = cleanData(df);
-        df = exampleWindowFunction(df);
+        df = ageFilter(df);
         df = columnSelection(df);
+        df = nationalityTeamPositionFilter(df);
         // for show 100 records after your transformations and show the Dataset schema
         df.show(100, false);
         df.printSchema();
@@ -40,7 +43,7 @@ public class Transformer extends Writer {
                 overall.column(),
                 heightCm.column(),
                 teamPosition.column(),
-                rankByNationality.column(),
+                ageRange.column(),
                 longName.column(),
                 age.column(),
                 weightKg.column(),
@@ -85,19 +88,28 @@ public class Transformer extends Writer {
      * cat B for if is in 50 players tallest
      * cat C for the rest
      */
-    private Dataset<Row> exampleWindowFunction(Dataset<Row> df) {
+    private Dataset<Row> ageFilter(Dataset<Row> df) {
 
         Column rule = when(col(age.getName()).$less(Constants.NUMBER_23), Constants.LETTER_A)
                 .when(col(age.getName()).$less(Constants.NUMBER_27), Constants.LETTER_B)
                 .when(col(age.getName()).$less(Constants.NUMBER_32), Constants.LETTER_C)
                 .otherwise(Constants.LETTER_D);
 
-        df = df.withColumn(rankByNationality.getName(), rule);
+        df = df.withColumn(ageRange.getName(), rule);
 
         return df;
     }
 
+    private Dataset<Row> nationalityTeamPositionFilter(Dataset<Row> df){
+        WindowSpec w = Window
+                .partitionBy(nationality.column(),teamPosition.column())
+                .orderBy(overall.column().desc());
 
+        Column rowNumber = row_number().over(w);
 
+        df = df.withColumn(rankByNationality.getName(), rowNumber);
+
+        return df;
+    }
 
 }
