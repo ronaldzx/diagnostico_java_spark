@@ -132,7 +132,7 @@ public class Transformer extends Writer {
      */
     private Dataset<Row> evaluateConditions(Dataset<Row> df) {
         Dataset<Row> result;
-        result = conditionA(df).unionByName(conditionB(df)).union(conditionC(df)).union(conditionD(df));
+        result = conditionA(df).union(conditionB(df)).union(conditionC(df)).union(conditionD(df));
         return result;
     }
 
