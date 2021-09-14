@@ -33,7 +33,7 @@ public class Transformer extends Writer {
         df.printSchema();
 
         // Uncomment when you want write your final output
-        //write(df);
+//        write(df);
     }
 
     private Dataset<Row> columnSelection(Dataset<Row> df) {
@@ -100,9 +100,9 @@ public class Transformer extends Writer {
         return df;
     }
 
-    private Dataset<Row> nationalityTeamPositionFilter(Dataset<Row> df){
+    private Dataset<Row> nationalityTeamPositionFilter(Dataset<Row> df) {
         WindowSpec w = Window
-                .partitionBy(nationality.column(),teamPosition.column())
+                .partitionBy(nationality.column(), teamPosition.column())
                 .orderBy(overall.column().desc());
 
         Column rowNumber = row_number().over(w);
@@ -112,10 +112,25 @@ public class Transformer extends Writer {
         return df;
     }
 
-    private Dataset<Row> potentialVsOverall(Dataset<Row> df){
+    private Dataset<Row> potentialVsOverall(Dataset<Row> df) {
         Column result = col(potential.getName()).divide(col(overall.getName()));
         System.out.println(result);
         df = df.withColumn(potentialVsOverall.getName(), result);
+        return df;
+    }
+
+    /**
+     * What should I do when conditions are met. Question 5
+     */
+    private Dataset<Row> conditions(Dataset<Row> df) {
+        Column rule_A = when(col(rankByNationality.getName()).$less(Constants.NUMBER_3), "What should I put here");
+        Column rule_B = when(col(ageRange.getName()).equalTo(Constants.LETTER_B).equalTo(Constants.LETTER_C)
+                .and(col(potentialVsOverall.getName()).$greater(Constants.DECIMAL_1_15)), "What should I put here");
+        Column rule_C = when(col(ageRange.getName()).equalTo(Constants.LETTER_A).and(col(potentialVsOverall.getName())
+                .$greater(Constants.DECIMAL_1_25)), "What should I put here");
+        Column rule_D = when(col(ageRange.getName()).equalTo(Constants.LETTER_D).and(col(potentialVsOverall.getName())
+                .$less(Constants.DECIMAL_5)), "What should I put here");
+//        df = df.withColumn(ageRange.getName(), rule_A);
         return df;
     }
 
