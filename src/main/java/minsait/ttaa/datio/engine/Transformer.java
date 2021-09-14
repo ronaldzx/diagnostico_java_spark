@@ -1,6 +1,7 @@
 package minsait.ttaa.datio.engine;
 
 import minsait.ttaa.datio.utils.Constants;
+import minsait.ttaa.datio.utils.PropertiesUtils;
 import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -81,14 +82,9 @@ public class Transformer extends Writer {
     }
 
     /**
-     * @param df is a Dataset with players information (must have team_position and height_cm columns)
-     * @return add to the Dataset the column "cat_height_by_position"
-     * by each position value
-     * cat A for if is in 20 players tallest
-     * cat B for if is in 50 players tallest
-     * cat C for the rest
+     * Question 2
      */
-    private Dataset<Row> ageFilter(Dataset<Row> df) {
+    public Dataset<Row> ageFilter(Dataset<Row> df) {
 
         Column rule = when(col(age.getName()).$less(Constants.NUMBER_23), Constants.LETTER_A)
                 .when(col(age.getName()).$less(Constants.NUMBER_27), Constants.LETTER_B)
@@ -99,6 +95,10 @@ public class Transformer extends Writer {
 
         return df;
     }
+
+    /**
+     * Question 3
+     */
 
     private Dataset<Row> nationalityTeamPositionFilter(Dataset<Row> df) {
         WindowSpec w = Window
@@ -111,6 +111,10 @@ public class Transformer extends Writer {
 
         return df;
     }
+
+    /**
+     *  Question 4
+     */
 
     private Dataset<Row> potentialVsOverall(Dataset<Row> df) {
         Column result = col(potential.getName()).divide(col(overall.getName()));

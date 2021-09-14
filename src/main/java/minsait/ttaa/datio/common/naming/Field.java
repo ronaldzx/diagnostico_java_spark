@@ -6,7 +6,7 @@ import static org.apache.spark.sql.functions.col;
 
 public class Field {
 
-    Field(String name) {
+    public Field(String name) {
         this.name = name;
     }
 
