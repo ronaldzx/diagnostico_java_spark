@@ -9,8 +9,6 @@ import org.apache.spark.sql.expressions.Window;
 import org.apache.spark.sql.expressions.WindowSpec;
 import org.jetbrains.annotations.NotNull;
 
-import javax.xml.crypto.Data;
-
 import static minsait.ttaa.datio.common.Common.*;
 import static minsait.ttaa.datio.common.naming.PlayerInput.*;
 import static minsait.ttaa.datio.common.naming.PlayerOutput.*;
@@ -29,6 +27,7 @@ public class Transformer extends Writer {
         df = ageFilter(df);
         df = columnSelection(df);
         df = nationalityTeamPositionFilter(df);
+        df = potentialVsOverall(df);
         // for show 100 records after your transformations and show the Dataset schema
         df.show(100, false);
         df.printSchema();
@@ -48,7 +47,8 @@ public class Transformer extends Writer {
                 age.column(),
                 weightKg.column(),
                 nationality.column(),
-                clubName.column()
+                clubName.column(),
+                potential.column()
         );
     }
 
@@ -109,6 +109,13 @@ public class Transformer extends Writer {
 
         df = df.withColumn(rankByNationality.getName(), rowNumber);
 
+        return df;
+    }
+
+    private Dataset<Row> potentialVsOverall(Dataset<Row> df){
+        Column result = col(potential.getName()).divide(col(overall.getName()));
+        System.out.println(result);
+        df = df.withColumn(potentialVsOverall.getName(), result);
         return df;
     }
 

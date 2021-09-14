@@ -11,4 +11,5 @@ public final class PlayerInput {
     public static Field weightKg = new Field("weight_kg");
     public static Field nationality = new Field("nationality");
     public static Field clubName = new Field("club_name");
+    public static Field potential = new Field("potential");
 }
