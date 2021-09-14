@@ -33,7 +33,7 @@ public class Transformer extends Writer {
         df.printSchema();
 
         // Uncomment when you want write your final output
-//        write(df);
+        write(df);
     }
 
     private Dataset<Row> columnSelection(Dataset<Row> df) {
