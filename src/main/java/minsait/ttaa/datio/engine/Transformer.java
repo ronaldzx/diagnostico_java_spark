@@ -1,5 +1,6 @@
 package minsait.ttaa.datio.engine;
 
+import minsait.ttaa.datio.utils.Constants;
 import org.apache.spark.sql.Column;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
@@ -25,7 +26,6 @@ public class Transformer extends Writer {
         df = cleanData(df);
         df = exampleWindowFunction(df);
         df = columnSelection(df);
-
         // for show 100 records after your transformations and show the Dataset schema
         df.show(100, false);
         df.printSchema();
@@ -40,7 +40,12 @@ public class Transformer extends Writer {
                 overall.column(),
                 heightCm.column(),
                 teamPosition.column(),
-                catHeightByPosition.column()
+                rankByNationality.column(),
+                longName.column(),
+                age.column(),
+                weightKg.column(),
+                nationality.column(),
+                clubName.column()
         );
     }
 
@@ -81,17 +86,13 @@ public class Transformer extends Writer {
      * cat C for the rest
      */
     private Dataset<Row> exampleWindowFunction(Dataset<Row> df) {
-        WindowSpec w = Window
-                .partitionBy(teamPosition.column())
-                .orderBy(heightCm.column().desc());
 
-        Column rank = rank().over(w);
+        Column rule = when(col(age.getName()).$less(Constants.NUMBER_23), Constants.LETTER_A)
+                .when(col(age.getName()).$less(Constants.NUMBER_27), Constants.LETTER_B)
+                .when(col(age.getName()).$less(Constants.NUMBER_32), Constants.LETTER_C)
+                .otherwise(Constants.LETTER_D);
 
-        Column rule = when(rank.$less(10), "A")
-                .when(rank.$less(50), "B")
-                .otherwise("C");
-
-        df = df.withColumn(catHeightByPosition.getName(), rule);
+        df = df.withColumn(rankByNationality.getName(), rule);
 
         return df;
     }
