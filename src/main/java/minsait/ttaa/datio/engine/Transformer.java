@@ -9,6 +9,10 @@ import org.apache.spark.sql.SparkSession;
 import org.apache.spark.sql.expressions.Window;
 import org.apache.spark.sql.expressions.WindowSpec;
 import org.jetbrains.annotations.NotNull;
+import scala.collection.immutable.Stream;
+
+import javax.sql.DataSource;
+import javax.xml.crypto.Data;
 
 import static minsait.ttaa.datio.common.Common.*;
 import static minsait.ttaa.datio.common.naming.PlayerInput.*;
@@ -29,6 +33,7 @@ public class Transformer extends Writer {
         df = columnSelection(df);
         df = nationalityTeamPositionFilter(df);
         df = potentialVsOverall(df);
+        df = evaluateConditions(df);
         // for show 100 records after your transformations and show the Dataset schema
         df.show(100, false);
         df.printSchema();
@@ -113,29 +118,43 @@ public class Transformer extends Writer {
     }
 
     /**
-     *  Question 4
+     * Question 4
      */
 
     private Dataset<Row> potentialVsOverall(Dataset<Row> df) {
         Column result = col(potential.getName()).divide(col(overall.getName()));
-        System.out.println(result);
         df = df.withColumn(potentialVsOverall.getName(), result);
         return df;
     }
 
     /**
-     * What should I do when conditions are met. Question 5
+     * Question 5
      */
-    private Dataset<Row> conditions(Dataset<Row> df) {
-        Column rule_A = when(col(rankByNationality.getName()).$less(Constants.NUMBER_3), "What should I put here");
-        Column rule_B = when(col(ageRange.getName()).equalTo(Constants.LETTER_B).equalTo(Constants.LETTER_C)
-                .and(col(potentialVsOverall.getName()).$greater(Constants.DECIMAL_1_15)), "What should I put here");
-        Column rule_C = when(col(ageRange.getName()).equalTo(Constants.LETTER_A).and(col(potentialVsOverall.getName())
-                .$greater(Constants.DECIMAL_1_25)), "What should I put here");
-        Column rule_D = when(col(ageRange.getName()).equalTo(Constants.LETTER_D).and(col(potentialVsOverall.getName())
-                .$less(Constants.DECIMAL_5)), "What should I put here");
-//        df = df.withColumn(ageRange.getName(), rule_A);
+    private Dataset<Row> evaluateConditions(Dataset<Row> df) {
+        Dataset<Row> result;
+        result = conditionA(df).unionByName(conditionB(df)).union(conditionC(df)).union(conditionD(df));
+        return result;
+    }
+
+    private Dataset<Row> conditionA(Dataset<Row> df){
+        df = df.filter(col(rankByNationality.getName()).$less(Constants.NUMBER_3));
         return df;
     }
 
+    private Dataset<Row> conditionB(Dataset<Row> df){
+        df = df.filter(col(ageRange.getName()).equalTo(Constants.LETTER_B).or(col(ageRange.getName()).equalTo(Constants.LETTER_C))
+                .and(col(potentialVsOverall.getName()).$greater(Constants.DECIMAL_1_15)));
+        return df;
+    }
+    private Dataset<Row> conditionC(Dataset<Row> df){
+        df = df.filter(col(ageRange.getName()).equalTo(Constants.LETTER_A).and(col(potentialVsOverall.getName())
+                .$greater(Constants.DECIMAL_1_25)));
+        return df;
+    }
+
+    private Dataset<Row> conditionD(Dataset<Row> df){
+        df = df.filter(col(ageRange.getName()).equalTo(Constants.LETTER_D).and(col(rankByNationality.getName())
+                .$less(Constants.DECIMAL_5)));
+        return df;
+    }
 }

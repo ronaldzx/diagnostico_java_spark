@@ -1,20 +1,16 @@
 package minsait.ttaa.datio;
 
-import minsait.ttaa.datio.common.naming.Field;
 import minsait.ttaa.datio.engine.Transformer;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.sql.*;
 import org.apache.spark.sql.types.DataTypes;
-import org.apache.spark.sql.types.Metadata;
 import org.apache.spark.sql.types.StructField;
 import org.apache.spark.sql.types.StructType;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static minsait.ttaa.datio.common.Common.SPARK_MODE;
